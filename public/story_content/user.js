@@ -7,29 +7,32 @@ var setVar = player.SetVar;
 var getVar = player.GetVar;
 window.Script1 = function()
 {
-  console.log(io); // Ensure `io` is available (e.g., Socket.IO library is loaded)
+  //console.log(io); // Ensure `io` is available (e.g., Socket.IO library is loaded)
 
 // Initialize the socket connection
-const socket = io('http://localhost:4000');
+const socket = io('https://fahoot.glitch.me/');
 
 // Get the player object
 let player = GetPlayer();
-let clicked = false; 
+let clicked = false;
+let btn = document.querySelector("[data-acc-text='btn']");
 let name;
 
-// Select the button element
-let btn = document.querySelector("[data-acc-text='btn']");
-
-// Add event listeners for both click and touchend events
 btn.addEventListener("click", sendName);
-btn.addEventListener("touchend", sendName);
+btn.addEventListener("touchstart", sendName, { passive: false });
+btn.addEventListener("touchend", sendName, { passive: false });
 
-// Function to send the player's name
-function sendName() {
-	clicked = true;
-    name = player.GetVar("name"); // Get the player's name
-    if (name !== '') { // Check if the name is not empty
-        socket.emit("find", { name: name }); // Emit the "find" event with the name
+function sendName(event) {
+    event.preventDefault();
+    if (clicked) return;
+    clicked = true;
+    try {
+        name = player.GetVar("name");
+        if (name !== '') {
+            socket.emit("find", { name: name });
+        }
+    } catch (error) {
+        console.error("Error in sendName:", error);
     }
 }
 
@@ -50,7 +53,7 @@ socket.on("message", (e) => {
 window.Script2 = function()
 {
   let player = GetPlayer(); 
-let question_no = player.GetVar("question_no") - 1; 
+  let question_no = player.GetVar("question_no") - 1; 
 
 const quizQuestions = [
   {
@@ -118,7 +121,7 @@ player.SetVar("correct_answer", quizQuestions[question_no].correctAnswer);
 
 window.Script3 = function()
 {
-  const socket = io('http://localhost:4000'); 
+  const socket = io('https://fahoot.glitch.me/'); 
 
 let player = GetPlayer();
 let sessionId = player.GetVar("ID"); // Assuming sessionId is stored in the player object
@@ -150,10 +153,10 @@ socket.on("getScore", (data) => {
 
             player.SetVar("getScore", true); // Indicate that scores have been received
         } else {
-            console.error("Not enough players in the data received:", scores);
+            //console.error("Not enough players in the data received:", scores);
         }
     } else {
-        console.error("Received data for a different session:", data.sessionId);
+        //console.error("Received data for a different session:", data.sessionId);
     }
 });
 }
